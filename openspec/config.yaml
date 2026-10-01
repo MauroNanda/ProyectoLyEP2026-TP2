@@ -1,0 +1,80 @@
+schema: spec-driven
+
+context: |
+  ProyectoLyEP2026-TP2, Grupo 15. Documentación y propuestas en español.
+  Antes de proponer, revisar o implementar un change, leer openspec/ROADMAP.md
+  y verificar archivos, ramas y changes relacionados en su estado actual.
+  ROADMAP.md es una guía común, no un change implementable ni evidencia de cierre.
+  Frontend React/Vite existente en client/. Backend pendiente en server/.
+  Backend acordado: Node.js + Express en JavaScript, con MongoDB Atlas.
+  API /api/clientes, identificador público id como cadena y datos ficticios propios.
+  Clientes comerciales separados de usuarios de acceso; no persistir sus credenciales simuladas.
+  El coordinador asigna tareas mediante issues detallados. Leer el issue asignado
+  antes de proponer el change y respetar su alcance, contratos y dependencias.
+  La conexión a Atlas pertenece al change de modelos/persistencia;
+  el servidor consume esa conexión y coordina su arranque y cierre.
+  Deploy es evolución futura opcional, sin prioridad ni tareas en los changes actuales.
+  Registrar uso de IA y revisión real en el PR; aportes y enlaces en el documento académico.
+  Preservar funcionalidades del TP1 y el contrato consumido por el frontend.
+  La entrega académica es un hito; la evolución posterior se acuerda por separado.
+  Ramas feature/<nombre-apellido>-<tarea>. Nunca hacer push directo a main.
+  No crear commits sin autorización explícita y validación previa del usuario.
+  Push y apertura o fusión de PR requieren autorización para la acción.
+  No configurar todavía checks obligatorios del frontend.
+
+rules:
+  proposal:
+    - Identificar el issue asignado y delimitar su área, dependencias, decisiones pendientes y exclusiones.
+    - No ampliar el alcance del issue ni asignar personas; plantear contradicciones para revisión.
+    - No convertir todo el roadmap o las mejoras futuras en una única implementación.
+    - Revisar solapamientos con ramas y changes existentes antes de proponer trabajo.
+  design:
+    - Distinguir decisiones acordadas, alternativas propuestas y preguntas pendientes.
+    - Explicitar contratos entre áreas y compatibilidad con el frontend existente.
+  specs:
+    - Conservar encabezados y palabras normativas requeridos por OpenSpec; descripciones en español.
+    - Definir comportamientos observables con escenarios verificables del alcance elegido.
+  tasks:
+    - Explicitar responsabilidades, dependencias, verificación y documentación pertinente.
+    - No marcar tareas completas sin evidencia de cumplimiento.
+
+operations:
+  apply:
+    guidance:
+      - Confirmar autorización para implementar el change seleccionado.
+      - Modificar solo archivos relacionados con el alcance y preservar funcionalidades.
+      - Informar resultados y pendientes; no crear commits automáticamente.
+  archive:
+    guidance:
+      - Verificar evidencia del change; su cierre no equivale al cierre de todo el TP2.
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
