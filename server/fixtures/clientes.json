@@ -1,0 +1,5 @@
+[
+  { "_id": "65a000000000000000000001", "email": "ana@example.com", "phone": "3880000001", "username": "ana", "name": { "firstname": "Ana", "lastname": "Pérez" }, "address": { "city": "San Salvador de Jujuy" } },
+  { "_id": "65a000000000000000000002", "email": "luis@example.com", "phone": "3870000002", "username": "luis", "name": { "firstname": "Luis", "lastname": "Gómez" }, "address": { "city": "Salta", "street": "Calle ficticia", "number": "100", "zipcode": "4400" } },
+  { "_id": "65a000000000000000000003", "email": "maria@example.com", "phone": "3810000003", "username": "maria", "name": { "firstname": "María", "lastname": "López" }, "address": { "city": "San Miguel de Tucumán" } }
+]
