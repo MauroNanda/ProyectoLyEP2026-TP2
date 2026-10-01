@@ -1,0 +1,13 @@
+{
+  "name": "proyecto-lyep-tp2-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test",
+    "seed:clientes": "node --env-file-if-exists=.env scripts/seed-clientes.js",
+    "verificar:persistencia": "node --env-file-if-exists=.env scripts/verificar-persistencia.js"
+  },
+  "dependencies": { "mongodb": "^7.7.0" }
+}
