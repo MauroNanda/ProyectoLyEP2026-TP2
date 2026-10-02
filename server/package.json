@@ -3,11 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
+    "start": "node --env-file-if-exists=.env index.js",
+    "dev": "node --env-file-if-exists=.env --watch index.js",
     "test": "node --test",
     "seed:clientes": "node --env-file-if-exists=.env scripts/seed-clientes.js",
     "verificar:persistencia": "node --env-file-if-exists=.env scripts/verificar-persistencia.js"
   },
-  "dependencies": { "mongodb": "^7.7.0" }
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mongodb": "^7.7.0"
+  }
 }
