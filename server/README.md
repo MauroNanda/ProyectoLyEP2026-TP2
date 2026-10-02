@@ -4,6 +4,8 @@ Base JavaScript ESM con MongoDB Atlas. Requiere Node.js 24 o superior.
 
 La configuración, contratos y verificaciones están en [documents/persistencia.md](documents/persistencia.md).
 
+Los casos de uso de clientes, sus validaciones y el contrato de errores para controladores y middleware están en [documents/servicios.md](documents/servicios.md).
+
 Esta contribución no inicia un servidor HTTP: Express, rutas e integración del frontend se agregan en las siguientes tareas.
 
 ## Configuración de cada integrante
