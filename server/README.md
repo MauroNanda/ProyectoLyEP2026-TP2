@@ -6,6 +6,8 @@ La configuración, contratos y verificaciones están en [documents/persistencia.
 
 Los casos de uso de clientes, sus validaciones y el contrato de errores para controladores y middleware están en [documents/servicios.md](documents/servicios.md).
 
+Los controladores de clientes, las respuestas de éxito y la interfaz pendiente de integración con rutas/middleware están en [documents/controladores.md](documents/controladores.md).
+
 Esta contribución no inicia un servidor HTTP: Express, rutas e integración del frontend se agregan en las siguientes tareas.
 
 ## Configuración de cada integrante
