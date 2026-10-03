@@ -77,7 +77,7 @@ const DetalleCliente = () => {
 
       <p>
         <strong>Nombre:</strong>{" "}
-        {cliente.name.firstname} {cliente.name.lastname}
+        {cliente.name?.firstname || ''} {cliente.name?.lastname || ''}
       </p>
 
       <p>
@@ -88,32 +88,28 @@ const DetalleCliente = () => {
         <strong>Teléfono:</strong> {cliente.phone}
       </p>
 
+      {cliente.username && (
+        <p>
+          <strong>Usuario:</strong> {cliente.username}
+        </p>
+      )}
+
       <h2>Dirección</h2>
 
       <p>
-        <strong>Calle:</strong> {cliente.address.street}
+        <strong>Calle:</strong> {cliente.address?.street || '-'}
       </p>
 
       <p>
-        <strong>Número:</strong> {cliente.address.number}
+        <strong>Número:</strong> {cliente.address?.number || '-'}
       </p>
 
       <p>
-        <strong>Código Postal:</strong> {cliente.address.zipcode}
+        <strong>Código Postal:</strong> {cliente.address?.zipcode || '-'}
       </p>
 
       <p>
-        <strong>Ciudad:</strong> {cliente.address.city}
-      </p>
-
-      <h2>Credenciales</h2>
-
-      <p>
-        <strong>Usuario:</strong> {cliente.username}
-      </p>
-
-      <p>
-        <strong>Contraseña:</strong> {cliente.password}
+        <strong>Ciudad:</strong> {cliente.address?.city || '-'}
       </p>
 
       {puedeEliminar && (
@@ -133,7 +129,7 @@ const DetalleCliente = () => {
             <h3 id="modal-titulo">Confirmar eliminación</h3>
             <p>
               ¿Está seguro de que desea eliminar al cliente{" "}
-              <strong>{cliente.name.firstname} {cliente.name.lastname}</strong>? Esta acción no se puede deshacer.
+              <strong>{cliente.name?.firstname || ''} {cliente.name?.lastname || ''}</strong>? Esta acción no se puede deshacer.
             </p>
             <div className="modal-acciones">
               <button 

@@ -2,9 +2,8 @@ import '../css/dashboard.css'
 import { useEffect, useState } from 'react'
 import useAutorizaciones from '../hooks/useAutorizaciones'
 import AutorizacionesService from '../services/autorizacionesServices'
+import clientesService from '../services/clientesService'
 import Login from './Login'
-
-const URL_CLIENTES = 'https://fakestoreapi.com/users'
 
 const Dashboard = () => {
   const { admin } = useAutorizaciones()
@@ -16,13 +15,8 @@ const Dashboard = () => {
   useEffect(() => {
     let vigente = true
 
-    fetch(URL_CLIENTES)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Error al obtener clientes')
-        }
-        return res.json()
-      })
+    clientesService
+      .obtenerClientes()
       .then((data) => {
         if (!vigente) return
         setTotalClientes(Array.isArray(data) ? data.length : 0)
