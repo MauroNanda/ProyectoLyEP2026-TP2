@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "https://fakestoreapi.com/users";
+const URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api/clientes";
 
 const obtenerClientes = async () => {
     const respuesta = await axios.get(URL);
