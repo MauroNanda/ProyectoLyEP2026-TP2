@@ -1,14 +1,11 @@
-import '../css/footer.css'
-const Footer = () => {
-  return (
-    <footer>
-      <p>
-        &copy; 2026 Panel de Control de Clientes | Trabajo Integrador
-        Programacion Visual - GRUPO 5
-      </p>
-
-    </footer>
-  );
-};
-
+import ApachetaLogo from "./ApachetaLogo";
+const Footer = () => (
+  <footer className="app-footer">
+    <span className="footer-brand" translate="no">
+      <ApachetaLogo size={20} />
+      Apacheta
+    </span>
+    <span>Grupo 15 · LyEP 2026</span>
+  </footer>
+);
 export default Footer;

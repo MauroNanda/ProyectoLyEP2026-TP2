@@ -1,0 +1,26 @@
+{
+  "installedAt": "2026-10-03",
+  "scope": "project-local",
+  "skills": [
+    {
+      "name": "impeccable",
+      "repository": "https://github.com/pbakaus/impeccable",
+      "ref": "e103efe779e2dd01274dabae83531fef00bf2563",
+      "path": ".agents/skills/impeccable"
+    },
+    {
+      "name": "interface-design",
+      "repository": "https://github.com/Dammyjay93/interface-design",
+      "ref": "2f9be3206855bcb2d1d0af262c8bae25cba6658d",
+      "path": ".claude/skills/interface-design"
+    },
+    {
+      "name": "web-design-guidelines",
+      "repository": "https://github.com/vercel-labs/agent-skills",
+      "ref": "main",
+      "path": "skills/web-design-guidelines"
+    }
+  ],
+  "guidelines": "https://vercel.com/design/guidelines",
+  "note": "Interface Design corresponde también al último enlace solicitado; se instala una sola vez. No se ejecutan comandos de instalación al iniciar el cliente."
+}

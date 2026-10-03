@@ -1,7 +1,9 @@
-import '../css/detallecliente.css';
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Modal, Button, Spinner } from "react-bootstrap";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import clientesService from "../services/clientesService";
+import Icon from "../components/Icon";
 import useAutorizaciones from "../hooks/useAutorizaciones";
 
 const DetalleCliente = () => {
@@ -13,144 +15,202 @@ const DetalleCliente = () => {
   const [mensaje, setMensaje] = useState("");
   const [errorCarga, setErrorCarga] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [eliminando, setEliminando] = useState(false);
+  const [errorBaja, setErrorBaja] = useState("");
+  const deletePending = useRef(false);
 
   // Declaración necesaria para los permisos de borrado
   const puedeEliminar = sector?.trim() === "Gerencia";
 
   useEffect(() => {
+    let vigente = true;
     clientesService
       .obtenerClientePorId(id)
-      .then((data) => setCliente(data))
-      .catch(() => setErrorCarga(true));
-  }, [id]);
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && mostrarModal) {
-        setMostrarModal(false);
-      }
+      .then((data) => {
+        if (vigente) setCliente(data);
+      })
+      .catch(() => {
+        if (vigente) setErrorCarga(id);
+      });
+    return () => {
+      vigente = false;
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mostrarModal]);
+  }, [id]);
 
   const solicitarConfirmacion = () => {
     if (!puedeEliminar) {
       setMensaje("No tiene permisos para eliminar clientes");
       return;
     }
+    setErrorBaja("");
     setMostrarModal(true);
   };
 
   const confirmarEliminacion = async () => {
-    setMostrarModal(false);
+    if (!puedeEliminar || deletePending.current) return;
+    deletePending.current = true;
+    setEliminando(true);
+    setErrorBaja("");
     try {
       await clientesService.eliminarCliente(id);
-      setMensaje("Cliente eliminado correctamente");
-
-      setTimeout(() => {
-        navigate("/clientes");
-      }, 2000);
+      setMostrarModal(false);
+      navigate("/clientes", {
+        state: { notice: "Cliente eliminado correctamente." },
+      });
     } catch {
-      setMensaje("Error al eliminar cliente");
+      setErrorBaja(
+        "No se pudo eliminar el cliente. Intentá nuevamente o cancelá para volver a la ficha.",
+      );
+    } finally {
+      deletePending.current = false;
+      setEliminando(false);
     }
   };
 
-  if (errorCarga) {
-    return <h2>Error al cargar el detalle del cliente.</h2>;
-  }
-
-  if (!cliente) {
-    return <h2>Cargando cliente...</h2>;
-  }
-
+  if (errorCarga === id)
+    return (
+      <div className="state-box state-error" role="alert">
+        <h1>No se pudo cargar la ficha</h1>
+        <p>Volvé al listado para consultar el cliente nuevamente.</p>
+        <Link to="/clientes" className="button button-secondary">
+          Volver a clientes
+        </Link>
+      </div>
+    );
+  if (!cliente || String(cliente.id) !== id)
+    return (
+      <div className="state-box" role="status">
+        Cargando ficha…
+      </div>
+    );
+  const nombre =
+    [cliente.name?.firstname, cliente.name?.lastname]
+      .filter(Boolean)
+      .join(" ") || "Sin nombre";
+  const dato = (valor) =>
+    valor === undefined || valor === null || valor === ""
+      ? "No informado"
+      : valor;
   return (
-    <div className="detalle-cliente">
-      <h1>Ficha del Cliente</h1>
-      <p>Rol actual: {sector}</p>
-
-      {mensaje && <p className="mensaje-eliminado">{mensaje}</p>}
-
-      <p>
-        <strong>ID:</strong> {cliente.id}
-      </p>
-
-      <p>
-        <strong>Nombre:</strong>{" "}
-        {cliente.name?.firstname || ''} {cliente.name?.lastname || ''}
-      </p>
-
-      <p>
-        <strong>Email:</strong> {cliente.email}
-      </p>
-
-      <p>
-        <strong>Teléfono:</strong> {cliente.phone}
-      </p>
-
-      {cliente.username && (
-        <p>
-          <strong>Usuario:</strong> {cliente.username}
+    <section className="detalle-cliente" aria-labelledby="ficha-titulo">
+      <Link className="back-link" to="/clientes">
+        <Icon name="back" size={18} /> Volver a clientes
+      </Link>
+      <div className="page-heading">
+        <div>
+          <h1 id="ficha-titulo">{nombre}</h1>
+          <p className="muted">
+            {cliente.address?.city || "Ciudad no informada"} · ID: {cliente.id}
+          </p>
+        </div>
+      </div>
+      {mensaje && (
+        <p className="state-box" role="status">
+          {mensaje}
         </p>
       )}
-
-      <h2>Dirección</h2>
-
-      <p>
-        <strong>Calle:</strong> {cliente.address?.street || '-'}
-      </p>
-
-      <p>
-        <strong>Número:</strong> {cliente.address?.number || '-'}
-      </p>
-
-      <p>
-        <strong>Código Postal:</strong> {cliente.address?.zipcode || '-'}
-      </p>
-
-      <p>
-        <strong>Ciudad:</strong> {cliente.address?.city || '-'}
-      </p>
+      <div className="detail-section">
+        <h2>Contacto</h2>
+        <dl className="data-grid">
+          <div>
+            <dt>Email</dt>
+            <dd>{dato(cliente.email)}</dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd>{dato(cliente.phone)}</dd>
+          </div>
+          {cliente.username && (
+            <div>
+              <dt>Usuario</dt>
+              <dd>{cliente.username}</dd>
+            </div>
+          )}
+        </dl>
+      </div>
+      <div className="detail-section">
+        <h2>Dirección</h2>
+        <dl className="data-grid">
+          <div>
+            <dt>Calle</dt>
+            <dd>{dato(cliente.address?.street)}</dd>
+          </div>
+          <div>
+            <dt>Número</dt>
+            <dd>{dato(cliente.address?.number)}</dd>
+          </div>
+          <div>
+            <dt>Código postal</dt>
+            <dd>{dato(cliente.address?.zipcode)}</dd>
+          </div>
+          <div>
+            <dt>Ciudad</dt>
+            <dd>{dato(cliente.address?.city)}</dd>
+          </div>
+        </dl>
+      </div>
 
       {puedeEliminar && (
-        <button className="btn-eliminar" onClick={solicitarConfirmacion}>
-          Eliminar Cliente
-        </button>
-      )}
-
-      {mostrarModal && (
-        <div 
-          className="modal-overlay" 
-          role="dialog" 
-          aria-modal="true" 
-          aria-labelledby="modal-titulo"
-        >
-          <div className="modal-contenido">
-            <h3 id="modal-titulo">Confirmar eliminación</h3>
-            <p>
-              ¿Está seguro de que desea eliminar al cliente{" "}
-              <strong>{cliente.name?.firstname || ''} {cliente.name?.lastname || ''}</strong>? Esta acción no se puede deshacer.
+        <div className="danger-zone">
+          <div>
+            <h2>Eliminar cliente</h2>
+            <p className="muted">
+              Esta acción requiere confirmación. Sector actual: {sector}.
             </p>
-            <div className="modal-acciones">
-              <button 
-                className="btn-cancelar" 
-                onClick={() => setMostrarModal(false)}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="btn-confirmar-eliminar" 
-                onClick={confirmarEliminacion}
-                autoFocus
-              >
-                Confirmar
-              </button>
-            </div>
           </div>
+          <button
+            className="button button-danger"
+            onClick={solicitarConfirmacion}
+          >
+            Eliminar cliente
+          </button>
         </div>
       )}
-    </div>
+      <Modal
+        show={mostrarModal}
+        onHide={() => {
+          if (!eliminando) setMostrarModal(false);
+        }}
+        keyboard={!eliminando}
+        backdrop={eliminando ? "static" : true}
+        centered
+        aria-labelledby="modal-titulo"
+      >
+        <Modal.Header
+          closeButton={!eliminando}
+          closeLabel="Cerrar confirmación"
+        >
+          <Modal.Title id="modal-titulo">Confirmar eliminación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          ¿Eliminar a <strong>{nombre}</strong>? Esta acción no se puede
+          deshacer.
+          {errorBaja && (
+            <p className="inline-message error-message" role="alert">
+              {errorBaja}
+            </p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            className="button-secondary"
+            onClick={() => setMostrarModal(false)}
+            disabled={eliminando}
+            autoFocus
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            disabled={eliminando}
+            onClick={confirmarEliminacion}
+          >
+            {eliminando && <Spinner size="sm" aria-hidden="true" />}
+            Confirmar eliminación
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </section>
   );
 };
-
 export default DetalleCliente;
