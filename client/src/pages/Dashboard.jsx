@@ -1,83 +1,104 @@
-import '../css/dashboard.css'
-import { useEffect, useState } from 'react'
-import useAutorizaciones from '../hooks/useAutorizaciones'
-import AutorizacionesService from '../services/autorizacionesServices'
-import clientesService from '../services/clientesService'
-import Login from './Login'
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import useAutorizaciones from "../hooks/useAutorizaciones";
+import AutorizacionesService from "../services/autorizacionesServices";
+import Icon from "../components/Icon";
+import Login from "./Login";
+
+import clientesService from "../services/clientesService";
 
 const Dashboard = () => {
-  const { admin } = useAutorizaciones()
-  const usuariosPorSector = AutorizacionesService.contarUsuariosPorSector()
-  const [totalClientes, setTotalClientes] = useState(0)
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState(false)
+  const { admin } = useAutorizaciones();
+  const usuariosPorSector = AutorizacionesService.contarUsuariosPorSector();
+  const [totalClientes, setTotalClientes] = useState(0);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    let vigente = true
+    let vigente = true;
 
     clientesService
       .obtenerClientes()
       .then((data) => {
-        if (!vigente) return
-        setTotalClientes(Array.isArray(data) ? data.length : 0)
-        setCargando(false)
+        if (!vigente) return;
+        setTotalClientes(Array.isArray(data) ? data.length : 0);
+        setCargando(false);
       })
       .catch(() => {
-        if (!vigente) return
-        setError(true)
-        setCargando(false)
-      })
+        if (!vigente) return;
+        setError(true);
+        setCargando(false);
+      });
 
     return () => {
-      vigente = false
-    }
-  }, [])
+      vigente = false;
+    };
+  }, []);
 
+  if (!admin) return <Login />;
   return (
-    <div className="dashboard">
-
-      <h1>Panel de Control de Clientes</h1>
-
-      {!admin ? (
-        <div className="dashboard-login">
-          <h3>Bienvenido al sistema</h3>
-          <p>Ingrese sus credenciales para acceder.</p>
-          <Login />
+    <section className="dashboard" aria-labelledby="inicio-titulo">
+      <div className="page-heading">
+        <div>
+          <h1 id="inicio-titulo">Inicio</h1>
+          <p className="muted">
+            Hola, {admin.nombre}. Este es tu espacio de trabajo.
+          </p>
         </div>
-      ) : (
-        <>
-          <div className="user-card">
-            <h3>Usuario conectado</h3>
-
-            <p><strong>Administrador:</strong> {admin.nombre}</p>
-            <p><strong>Email:</strong> {admin.email}</p>
-            <p><strong>Sector:</strong> {admin.sector}</p>
-          </div>
-          <div className="dashboard-cards">
-
-            <div className="dashboard-card" aria-busy={cargando}>
-              <h3>Clientes</h3>
-              <p>{cargando ? '...' : error ? '-' : totalClientes}</p>
-              {error && (
-                <span role="alert" className="dashboard-card-error">
-                  No se pudo obtener el total de clientes.
-                </span>
-              )}
+      </div>
+      <section className="directory-entry" aria-labelledby="directorio-titulo">
+        <div className="entry-heading">
+          <h2 id="directorio-titulo">Tu directorio de clientes</h2>
+          <p className="client-total" role="status" aria-busy={cargando}>
+            {cargando
+              ? "Consultando clientes…"
+              : error
+                ? "Total no disponible"
+                : new Intl.NumberFormat("es-AR").format(totalClientes) +
+                  " clientes registrados"}
+          </p>
+        </div>
+        <p>
+          Encontrá los datos de contacto, consultá una ficha
+          <br className="desktop-break" /> o sumá un cliente a tu directorio.
+        </p>
+        <Link className="button button-primary" to="/clientes">
+          Ir a clientes
+          <Icon name="arrow" size={18} />
+        </Link>
+      </section>
+      <div className="home-secondary">
+        <section className="session-section" aria-labelledby="sesion-titulo">
+          <h2 id="sesion-titulo">Tu sesión</h2>
+          <dl className="data-grid">
+            <div>
+              <dt>Usuario</dt>
+              <dd>{admin.nombre}</dd>
             </div>
-
-            {Object.entries(usuariosPorSector).map(([nombreSector, cantidad]) => (
-              <div className="dashboard-card" key={nombreSector}>
-                <h3>{nombreSector}</h3>
-                <p>{cantidad}</p>
+            <div>
+              <dt>Email</dt>
+              <dd>{admin.email}</dd>
+            </div>
+            <div>
+              <dt>Sector</dt>
+              <dd>{admin.sector}</dd>
+            </div>
+          </dl>
+        </section>
+        <section className="team-summary">
+          <h2>Usuarios de acceso</h2>
+          <p className="muted">Distribución por sector</p>
+          <dl className="sector-counts">
+            {Object.entries(usuariosPorSector).map(([nombre, cantidad]) => (
+              <div key={nombre}>
+                <dt>{nombre}</dt>
+                <dd>{new Intl.NumberFormat("es-AR").format(cantidad)}</dd>
               </div>
             ))}
-          </div>
-
-        </>
-      )}
-
-    </div>
-  )
-}
-
-export default Dashboard
+          </dl>
+        </section>
+      </div>
+    </section>
+  );
+};
+export default Dashboard;
