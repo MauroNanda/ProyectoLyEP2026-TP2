@@ -21,6 +21,6 @@
 
 ## 4. Integración externa pendiente
 
-- [ ] 4.1 Cuando #6 esté disponible, revisar con su responsable el contrato y comprobar respuestas HTTP reales, 400/404/500 seguros y DELETE sin cuerpo; requiere servidor integrado y evidencia de esas solicitudes.
+- [x] 4.1 Cuando #6 esté disponible, revisar con su responsable el contrato y comprobar respuestas HTTP reales, 400/404/500 seguros y DELETE sin cuerpo; requiere servidor integrado y evidencia de esas solicitudes.
 
 El change queda activo: la tarea 4.1 no se acredita con dobles de solicitud/respuesta. Archivar, publicar, crear commits y cerrar el issue quedan fuera de esta ejecución.
