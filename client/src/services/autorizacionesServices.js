@@ -1,59 +1,26 @@
-const usuarios = [
-  {
-    email: 'antonella@gmail.com',
-    password: 'Admin123',
-    nombre: 'Antonella',
-    sector: 'Soporte'
-  },
-  {
-    email: 'jimena@gmail.com',
-    password: 'Admin123',
-    nombre: 'Jimena',
-    sector: 'Gerencia'
-  },
-  {
-    email: 'maia@gmail.com',
-    password: 'Admin123',
-    nombre: 'Maia',
-    sector: 'Gerencia'
-  },
-  {
-    email: 'abril@gmail.com',
-    password: 'Admin123',
-    nombre: 'Abril',
-    sector: 'Soporte'
-  },
-  {
-    email: 'guadalupe@gmail.com',
-    password: 'Admin123',
-    nombre: 'Guadalupe',
-    sector: 'Soporte'
-  },
-  {
-    email: 'lourdes@gmail.com',
-    password: 'Admin123',
-    nombre: 'Lourdes',
-    sector: 'Gerencia'
-  }
-]
-const login = (email, password, sector) => {
-  return usuarios.find(
-    usuario =>
-      usuario.email === email &&
-      usuario.password === password &&
-      usuario.sector === sector
-  )
+import { api } from './apiClient.js';
+import { sesionStore } from './sesionStore.js';
+export function crearAutorizacionesService(http = api, store = sesionStore) {
+  return {
+    async login(email, password) {
+      const datos = await http('auth/login', { method: 'POST', body: { email, password }, publico: true });
+      store.iniciar(datos);
+    },
+    async me() {
+      const version = store.getSnapshot().version;
+      const usuario = await http('auth/me'); store.actualizarUsuario(usuario, version); return usuario;
+    },
+    async logout() {
+      const { token, version } = store.comenzarSalida();
+      let aviso = 'Sesión cerrada.';
+      try { if (token) await http('auth/logout', { method: 'POST', tokenSalida: token }); }
+      catch (error) { if (error.status !== 401) aviso = 'Saliste de Apacheta. No pudimos confirmar la revocación remota de la sesión.'; }
+      finally { store.finalizarSalida(version, aviso); }
+    },
+    async cambiarPassword(actual, nueva) {
+      await http('auth/password', { method: 'PATCH', body: { actual, nueva } });
+      store.terminar('Contraseña cambiada. Todas tus sesiones se cerraron; volvé a ingresar.');
+    },
+  };
 }
-const contarUsuariosPorSector = () => {
-  return usuarios.reduce(
-    (conteo, usuario) => ({
-      ...conteo,
-      [usuario.sector]: (conteo[usuario.sector] || 0) + 1
-    }),
-    {}
-  )
-}
-export default {
-  login,
-  contarUsuariosPorSector
-}
+export default crearAutorizacionesService();
