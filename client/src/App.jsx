@@ -8,7 +8,7 @@ import AppRoutes from "./routes/routes";
 import useAutorizaciones from "./hooks/useAutorizaciones";
 
 function App() {
-  const { admin } = useAutorizaciones();
+  const { usuario, version } = useAutorizaciones();
   const { pathname } = useLocation();
   const login = pathname === "/login";
   const label = login
@@ -19,20 +19,22 @@ function App() {
         ? "Clientes"
         : pathname.startsWith("/clientes/")
           ? "Ficha del cliente"
-          : "Página no encontrada";
+          : pathname === "/cuentas" ? "Cuentas"
+          : pathname === "/historial-administrativo" ? "Historial administrativo"
+          : pathname === "/mi-cuenta" ? "Mi cuenta" : "Página no encontrada";
   useEffect(() => {
     document.title = label + " · Apacheta";
   }, [label]);
   return (
     <div
       className={
-        "apacheta-app " + (admin && !login ? "workspace-app" : "access-app")
+        "apacheta-app " + (usuario && !login ? "workspace-app" : "access-app")
       }
     >
       <a className="skip-link" href="#contenido">
         Ir al contenido
       </a>
-      {admin && !login ? (
+      {usuario && !login ? (
         <aside className="app-sidebar">
           <Header />
           <Nav />
@@ -42,7 +44,7 @@ function App() {
         !login && <Header />
       )}
       <div className="workspace-body">
-        {admin && !login && (
+        {usuario && !login && (
           <div className="workspace-context">
             <nav aria-label="Ubicación">
               <Link to="/" translate="no">
@@ -57,11 +59,11 @@ function App() {
               )}
               <span aria-current="page">{label}</span>
             </nav>
-            <span className="context-sector">{admin.sector}</span>
+            <span className="context-sector">{usuario.rol}</span>
           </div>
         )}
         <main id="contenido" className="app-main" tabIndex={-1}>
-          <AppRoutes />
+          <AppRoutes key={version} />
         </main>
         <Footer />
       </div>

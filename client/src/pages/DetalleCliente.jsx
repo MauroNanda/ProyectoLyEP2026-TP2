@@ -5,11 +5,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import clientesService from "../services/clientesService";
 import Icon from "../components/Icon";
 import useAutorizaciones from "../hooks/useAutorizaciones";
+import { mensajeError } from "../services/validacion";
 
 const DetalleCliente = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { sector } = useAutorizaciones();
+  const { rol, permisos } = useAutorizaciones();
 
   const [cliente, setCliente] = useState(null);
   const [mensaje, setMensaje] = useState("");
@@ -20,7 +21,7 @@ const DetalleCliente = () => {
   const deletePending = useRef(false);
 
   // Declaración necesaria para los permisos de borrado
-  const puedeEliminar = sector?.trim() === "Gerencia";
+  const puedeEliminar = permisos.eliminar;
 
   useEffect(() => {
     let vigente = true;
@@ -57,9 +58,9 @@ const DetalleCliente = () => {
       navigate("/clientes", {
         state: { notice: "Cliente eliminado correctamente." },
       });
-    } catch {
+    } catch (error) {
       setErrorBaja(
-        "No se pudo eliminar el cliente. Intentá nuevamente o cancelá para volver a la ficha.",
+        mensajeError(error),
       );
     } finally {
       deletePending.current = false;
@@ -155,7 +156,7 @@ const DetalleCliente = () => {
           <div>
             <h2>Eliminar cliente</h2>
             <p className="muted">
-              Esta acción requiere confirmación. Sector actual: {sector}.
+              Esta acción requiere confirmación. Rol actual: {rol}.
             </p>
           </div>
           <button

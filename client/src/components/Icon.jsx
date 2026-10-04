@@ -1,4 +1,7 @@
 const paths = {
+  accounts: "M3 5h18v14H3zM7 9h4M7 13h4M15 9h2M15 13h2",
+  history: "M5 4h14v16H5zM8 8h8M8 12h8M8 16h5",
+  lock: "M5 10h14v11H5zM8 10V6a4 4 0 0 1 8 0v4M12 14v3",
   home: "M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9",
   clients:
     "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87",

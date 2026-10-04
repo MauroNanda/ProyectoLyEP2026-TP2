@@ -3,6 +3,7 @@ import { Form, Spinner } from "react-bootstrap";
 import clientesService from "../services/clientesService";
 import useUnsavedChanges from "../hooks/useUnsavedChanges";
 import Icon from "./Icon";
+import { validarCliente, datosCliente, erroresDeApi, mensajeError, enfocarError } from "../services/validacion";
 
 const campos = [
   {
@@ -48,15 +49,7 @@ const FormCliente = ({ onCreated }) => {
   const submit = async (event) => {
     event.preventDefault();
     if (submitting.current) return;
-    const nextErrors = {};
-    for (const field of campos)
-      if (!values[field.name].trim())
-        nextErrors[field.name] = "Completá este campo.";
-    if (
-      values.email.trim() &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())
-    )
-      nextErrors.email = "Ingresá un email válido.";
+    const nextErrors = validarCliente(values);
     setErrors(nextErrors);
     setMessage("");
     setFailure("");
@@ -68,22 +61,16 @@ const FormCliente = ({ onCreated }) => {
     }
     submitting.current = true;
     setLoading(true);
-    const { nombre, email, telefono, ciudad } = values;
     try {
-      const response = await clientesService.crearCliente({
-        email,
-        username: nombre.toLowerCase().replace(/\s/g, ""),
-        name: { firstname: nombre, lastname: "-" },
-        address: { city: ciudad },
-        phone: telefono,
-      });
+      const response = await clientesService.crearCliente(datosCliente(values));
       setMessage("Cliente creado correctamente. ID: " + response.id);
       setValues(initial);
       onCreated?.();
-    } catch {
-      setFailure(
-        "No se pudo guardar el cliente. Los datos siguen aquí; intentá nuevamente.",
-      );
+    } catch (error) {
+      const fieldErrors = erroresDeApi(error, { email: "email", "name.firstname": "nombre", username: "nombre", phone: "telefono", "address.city": "ciudad" });
+      setErrors(fieldErrors);
+      setFailure(mensajeError(error));
+      enfocarError(form.current, fieldErrors);
     } finally {
       submitting.current = false;
       setLoading(false);
