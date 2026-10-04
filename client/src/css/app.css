@@ -1216,6 +1216,8 @@ select:disabled {
     scroll-behavior: auto !important;
   }
 }
+.personal-password { margin-top: 40px; max-width: 600px; }
+.field-help { font-size: 14px; margin: 8px 0; }
 @media (max-width: 800px) {
   .app-sidebar { grid-template-columns: minmax(0, 1fr) auto; }
   .app-nav { flex-wrap: wrap; gap: 4px; min-width: 0; }
