@@ -108,7 +108,7 @@ test('crear con los datos del formulario actual produce un cliente compatible', 
 test('opcionales ausentes toman valores compatibles y el número se guarda como cadena', async () => {
   const { modelo } = modeloRealControlado();
   const servicio = crearServicioClientes(modelo);
-  const minimo = { email: 'luis@example.com', phone: '1', name: { firstname: 'Luis' }, address: { city: 'Salta' } };
+  const minimo = { email: 'luis@example.com', phone: '3884000000', name: { firstname: 'Luis' }, address: { city: 'Salta' } };
   const creado = await servicio.crearCliente(minimo);
   assert.equal(creado.username, '');
   assert.equal(creado.name.lastname, '-');
@@ -120,12 +120,12 @@ test('opcionales ausentes toman valores compatibles y el número se guarda como 
 test('crear elimina espacios sobrantes sin otras transformaciones del email', async () => {
   const modelo = modeloControlado();
   await crearServicioClientes(modelo).crearCliente({
-    email: '  Ana.Perez@Example.com ', phone: ' 388 ', username: ' ana ',
+    email: '  Ana.Perez@Example.com ', phone: ' 3884000000 ', username: ' ana ',
     name: { firstname: ' Ana ', lastname: ' Pérez ' },
     address: { city: ' Jujuy ', street: ' Belgrano ', number: ' 12 ', zipcode: ' 4600 ' },
   });
   assert.deepEqual(modelo.llamadas[0].args[0], {
-    email: 'Ana.Perez@Example.com', phone: '388', username: 'ana',
+    email: 'Ana.Perez@Example.com', phone: '3884000000', username: 'ana',
     name: { firstname: 'Ana', lastname: 'Pérez' },
     address: { city: 'Jujuy', street: 'Belgrano', number: '12', zipcode: '4600' },
   });
