@@ -18,6 +18,10 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "mongodb": "^7.7.0"
+    "mongodb": "^7.7.0",
+    "swagger-ui-express": "5.0.1"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0"
   }
 }

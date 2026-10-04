@@ -1,3 +1,5 @@
+import swaggerUi from 'swagger-ui-express';
+import { openapi } from './documents/openapi.js';
 import express from 'express';
 import cors from 'cors';
 import { randomUUID } from 'node:crypto';
@@ -19,6 +21,15 @@ export function crearApp({controladores,seguridad=servicioSeguridad,corsOrigin=p
   });
   app.use(cors({origin:corsOrigin,methods:['GET','POST','PATCH','DELETE','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
   app.use(express.json({limit:'100kb'}));
+  app.locals.swaggerHabilitado = entorno.NODE_ENV === undefined || entorno.NODE_ENV === 'development';
+  if (app.locals.swaggerHabilitado) {
+    app.get('/api/openapi.json', (_req,res)=>res.set('Cache-Control','no-store').json(openapi));
+    const opcionesSwagger = {
+      customSiteTitle: 'Apacheta — API',
+      swaggerOptions: { persistAuthorization: false, validatorUrl: null },
+    };
+    app.use('/api/docs', swaggerUi.serveFiles(openapi, opcionesSwagger), swaggerUi.setup(openapi, opcionesSwagger));
+  }
   const ejecutar=fn=>async(req,res,next)=>{try {await fn(req,res);}catch(e){next(e);}};
   const auth=autenticar(seguridad), admin=permitir(['Administrador']);
   app.use('/api/auth',(req,res,next)=>{res.set('Cache-Control','no-store');next();});
