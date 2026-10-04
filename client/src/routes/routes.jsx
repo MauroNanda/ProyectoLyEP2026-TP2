@@ -8,6 +8,7 @@ import ErrorPage from '../pages/ErrorPage'
 import RutaProtegida from '../components/RutaProtegida'
 import MiCuenta from '../pages/MiCuenta'
 import Cuentas from '../pages/Cuentas'
+import HistorialAdministrativo from '../pages/HistorialAdministrativo'
 const AppRoutes = () => {
   return (
     <Routes>
@@ -39,6 +40,7 @@ const AppRoutes = () => {
       />
       <Route path="/mi-cuenta" element={<RutaProtegida><MiCuenta /></RutaProtegida>} />
       <Route path="/cuentas" element={<RutaProtegida administrativa><Cuentas /></RutaProtegida>} />
+      <Route path="/historial-administrativo" element={<RutaProtegida administrativa><HistorialAdministrativo /></RutaProtegida>} />
       <Route path="*" element={<ErrorPage />} />
 
     </Routes>
