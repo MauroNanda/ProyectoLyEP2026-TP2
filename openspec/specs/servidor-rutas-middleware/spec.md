@@ -38,21 +38,27 @@ La aplicación SHALL procesar cuerpos de solicitud con formato JSON (`applicatio
 ### Requirement: Enrutamiento de operaciones de clientes
 El enrutador del servidor SHALL registrar las cuatro operaciones del recurso `/api/clientes` y conectarlas directamente a los controladores de clientes reales (`listarClientes`, `obtenerClientePorId`, `crearCliente`, `eliminarCliente`).
 
+Las cuatro rutas SHALL exigir sesión vigente y el rol autorizado según cuentas-equipo; las respuestas de éxito y el id público se conservan. Preflight OPTIONS SHALL permanecer público.
+
 #### Scenario: Consulta de listado en GET /api/clientes
-- **WHEN** se realiza una solicitud `GET /api/clientes`
+- **WHEN** con una sesión vigente autorizada se realiza una solicitud `GET /api/clientes`
 - **THEN** la solicitud es atendida por `listarClientes` y devuelve estado 200 con el arreglo JSON de clientes
 
 #### Scenario: Consulta individual en GET /api/clientes/:id
-- **WHEN** se realiza una solicitud `GET /api/clientes/:id` con un identificador
+- **WHEN** con una sesión vigente autorizada se realiza una solicitud `GET /api/clientes/:id` con un identificador
 - **THEN** la solicitud es atendida por `obtenerClientePorId` entregando el parámetro `id` correspondiente
 
 #### Scenario: Creación en POST /api/clientes
-- **WHEN** se realiza una solicitud `POST /api/clientes` con el cuerpo del cliente
+- **WHEN** con una sesión vigente autorizada se realiza una solicitud `POST /api/clientes` con el cuerpo del cliente
 - **THEN** la solicitud es atendida por `crearCliente` entregando `req.body` y respondiendo 201 en caso de éxito
 
 #### Scenario: Eliminación en DELETE /api/clientes/:id
-- **WHEN** se realiza una solicitud `DELETE /api/clientes/:id`
+- **WHEN** con una sesión vigente autorizada se realiza una solicitud `DELETE /api/clientes/:id`
 - **THEN** la solicitud es atendida por `eliminarCliente` respondiendo 204 sin cuerpo en caso de éxito
+
+#### Scenario: Operación sin autorización
+- **WHEN** falta sesión válida o el rol no permite la operación
+- **THEN** responde 401 o 403 respectivamente sin invocar el caso de uso.
 
 ### Requirement: Tratamiento transversal de rutas inexistentes
 La aplicación SHALL interceptar cualquier solicitud HTTP cuya ruta o método no coincida con ningún endpoint registrado y SHALL responder con estado 404 y la estructura de error común.
@@ -62,7 +68,9 @@ La aplicación SHALL interceptar cualquier solicitud HTTP cuya ruta o método no
 - **THEN** el middleware responde con estado 404 y el cuerpo `{ "error": { "code": "RUTA_NO_ENCONTRADA", "message": "La ruta solicitada no existe." } }`
 
 ### Requirement: Middleware común de errores
-La aplicación SHALL disponer de un middleware de manejo de errores con firma `(err, req, res, next)` que capture las excepciones derivadas por controladores y otros middlewares, traduciendo los códigos conocidos a estados HTTP y construyendo la respuesta bajo el esquema `{ "error": { "code": "...", "message": "..." } }`. Ante errores no controlados o de almacenamiento, MUST responder con estado 500 y código seguro, sin revelar credenciales, cadenas de conexión ni trazas de error.
+La aplicación SHALL disponer de un middleware de manejo de errores con firma `(err, req, res, next)` que capture las excepciones derivadas por controladores y otros middlewares, traduciendo los códigos conocidos a estados HTTP y construyendo la respuesta bajo el esquema `{ "error": { "code": "...", "message": "..." } }`. Ante errores no controlados, MUST responder con estado 500 y código seguro, sin revelar credenciales, cadenas de conexión ni trazas de error.
+
+El middleware SHALL publicar campos opcional para validación, y reconocer errores controlados 401, 403, 409, 413, 429 y 503 conforme a [diseño del change](../../changes/archive/2026-10-04-cuentas-permisos-auditoria-backend/design.md), sin reenviar detalles del driver.
 
 #### Scenario: Error por entrada inválida o identificador inválido
 - **WHEN** un controlador deriva un error con código `ENTRADA_INVALIDA` o `ID_INVALIDO`
@@ -73,11 +81,25 @@ La aplicación SHALL disponer de un middleware de manejo de errores con firma `(
 - **THEN** el middleware responde con estado 404 y el cuerpo `{ "error": { "code": "CLIENTE_NO_ENCONTRADO", "message": "<mensaje del error>" } }`
 
 #### Scenario: Error inesperado o de base de datos
-- **WHEN** se deriva un error no categorizado, un fallo de conexión o un error de almacenamiento
+- **WHEN** se deriva un error no categorizado, un fallo no clasificado de conexión o almacenamiento
 - **THEN** el middleware responde con estado 500 y `{ "error": { "code": "ERROR_INTERNO", "message": "Ocurrió un error interno en el servidor." } }`, sin imprimir credenciales ni filtrar detalles sensibles
+
+#### Scenario: Almacenamiento indisponible controlado
+- **WHEN** se deriva un error tipado de conexión o almacenamiento indisponible
+- **THEN** responde 503 con código y mensaje seguros, sin detalles del driver.
+
+#### Scenario: Cuerpo JSON excesivo
+- **WHEN** el cuerpo supera el límite explícito de 100kb
+- **THEN** responde 413 con error seguro, no 500.
+
+#### Scenario: Campos rechazados
+- **WHEN** el servicio informa campos de entrada inválidos
+- **THEN** devuelve 400 y los nombres públicos en error.campos sin revelar datos internos.
 
 ### Requirement: Coordinación del ciclo de vida con MongoDB Atlas
 El módulo de arranque del servidor SHALL coordinar la inicialización y el apagado con las funciones compartidas de persistencia (`conectarBaseDeDatos` y `cerrarBaseDeDatos`). Si la conexión a la base de datos falla al iniciar, el servidor MUST NOT declarar disponibilidad normal y MUST abortar el arranque informando el error de forma segura sin exhibir credenciales. Ante señales de terminación (`SIGINT`, `SIGTERM`), el servidor SHALL detener la recepción de nuevas conexiones HTTP y cerrar la conexión a la base de datos.
+
+El servidor SHALL validar entorno antes de conectar, manejar errores al escuchar cerrando MongoDB y limitar el cierre a 10 segundos; fallos de arranque o cierre SHALL finalizar con código no cero.
 
 #### Scenario: Arranque coordinado exitoso
 - **WHEN** se ejecuta el arranque del servidor y la base de datos responde exitosamente al comando ping
@@ -90,3 +112,22 @@ El módulo de arranque del servidor SHALL coordinar la inicialización y el apag
 #### Scenario: Apagado ordenado ante señal de terminación
 - **WHEN** el proceso recibe una señal `SIGINT` o `SIGTERM`
 - **THEN** el servidor detiene la escucha HTTP y ejecuta `cerrarBaseDeDatos()` para liberar recursos limpiamente
+
+#### Scenario: Falla de escucha tras conectar
+- **WHEN** no puede abrir el puerto HTTP después de conectar a MongoDB
+- **THEN** libera la conexión y finaliza con código no cero sin declarar disponible el servidor.
+
+#### Scenario: Configuración inválida
+- **WHEN** PORT, HOST o CORS_ORIGIN incumplen el contrato de configuración
+- **THEN** rechaza el arranque con mensaje seguro antes de conectar o abrir puerto.
+
+### Requirement: Documentación interactiva de la API en desarrollo
+El servidor SHALL publicar Swagger UI en /api/docs y OpenAPI 3.0.3 en /api/openapi.json únicamente cuando NODE_ENV está ausente o es development. El contrato SHALL describir las operaciones de clientes, cuentas, autenticación y auditoría, permisos, cuerpos y errores. SHALL usar Bearer sin credenciales precargadas ni persistencia de autorización, recursos locales y sin validación externa.
+
+#### Scenario: Exploración local
+- **WHEN** se accede a la documentación en desarrollo
+- **THEN** muestra la API y permite autenticar con token manual sin omitir los permisos reales.
+
+#### Scenario: Producción
+- **WHEN** NODE_ENV es production
+- **THEN** ambas rutas documentales y sus recursos responden 404.

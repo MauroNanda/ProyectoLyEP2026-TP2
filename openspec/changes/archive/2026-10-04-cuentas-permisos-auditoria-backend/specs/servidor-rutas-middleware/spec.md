@@ -27,7 +27,7 @@ Las cuatro rutas SHALL exigir sesión vigente y el rol autorizado según cuentas
 
 
 ### Requirement: Middleware común de errores
-La aplicación SHALL disponer de un middleware de manejo de errores con firma `(err, req, res, next)` que capture las excepciones derivadas por controladores y otros middlewares, traduciendo los códigos conocidos a estados HTTP y construyendo la respuesta bajo el esquema `{ "error": { "code": "...", "message": "..." } }`. Ante errores no controlados o de almacenamiento, MUST responder con estado 500 y código seguro, sin revelar credenciales, cadenas de conexión ni trazas de error.
+La aplicación SHALL disponer de un middleware de manejo de errores con firma `(err, req, res, next)` que capture las excepciones derivadas por controladores y otros middlewares, traduciendo los códigos conocidos a estados HTTP y construyendo la respuesta bajo el esquema `{ "error": { "code": "...", "message": "..." } }`. Ante errores no controlados, MUST responder con estado 500 y código seguro, sin revelar credenciales, cadenas de conexión ni trazas de error.
 
 El middleware SHALL publicar campos opcional para validación, y reconocer errores controlados 401, 403, 409, 413, 429 y 503 conforme a design.md, sin reenviar detalles del driver.
 
@@ -40,8 +40,12 @@ El middleware SHALL publicar campos opcional para validación, y reconocer error
 - **THEN** el middleware responde con estado 404 y el cuerpo `{ "error": { "code": "CLIENTE_NO_ENCONTRADO", "message": "<mensaje del error>" } }`
 
 #### Scenario: Error inesperado o de base de datos
-- **WHEN** se deriva un error no categorizado, un fallo de conexión o un error de almacenamiento
+- **WHEN** se deriva un error no categorizado, un fallo no clasificado de conexión o almacenamiento
 - **THEN** el middleware responde con estado 500 y `{ "error": { "code": "ERROR_INTERNO", "message": "Ocurrió un error interno en el servidor." } }`, sin imprimir credenciales ni filtrar detalles sensibles
+
+#### Scenario: Almacenamiento indisponible controlado
+- **WHEN** se deriva un error tipado de conexión o almacenamiento indisponible
+- **THEN** responde 503 con código y mensaje seguros, sin detalles del driver.
 
 #### Scenario: Cuerpo JSON excesivo
 - **WHEN** el cuerpo supera el límite explícito de 100kb
@@ -76,3 +80,16 @@ El servidor SHALL validar entorno antes de conectar, manejar errores al escuchar
 #### Scenario: Configuración inválida
 - **WHEN** PORT, HOST o CORS_ORIGIN incumplen el contrato de configuración
 - **THEN** rechaza el arranque con mensaje seguro antes de conectar o abrir puerto.
+
+## ADDED Requirements
+
+### Requirement: Documentación interactiva de la API en desarrollo
+El servidor SHALL publicar Swagger UI en /api/docs y OpenAPI 3.0.3 en /api/openapi.json únicamente cuando NODE_ENV está ausente o es development. El contrato SHALL describir las operaciones de clientes, cuentas, autenticación y auditoría, permisos, cuerpos y errores. SHALL usar Bearer sin credenciales precargadas ni persistencia de autorización, recursos locales y sin validación externa.
+
+#### Scenario: Exploración local
+- **WHEN** se accede a la documentación en desarrollo
+- **THEN** muestra la API y permite autenticar con token manual sin omitir los permisos reales.
+
+#### Scenario: Producción
+- **WHEN** NODE_ENV es production
+- **THEN** ambas rutas documentales y sus recursos responden 404.

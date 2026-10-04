@@ -9,6 +9,7 @@ Apacheta necesita distinguir a las personas que usan la herramienta de los clien
 - Permitir al administrador crear, listar, editar datos/rol y activar o desactivar cuentas, conservando al menos un administrador activo.
 - Registrar accesos, cierres de sesión y cambios de cuentas/clientes en un historial de solo lectura para administradores.
 - Mejorar validaciones comerciales, errores por campo, tratamiento de cuerpos excesivos y arranque/cierre.
+- Incorporar OpenAPI y Swagger UI en desarrollo para explorar y probar la API con Bearer, sin credenciales precargadas.
 - Entregar contratos para un change de frontend posterior, sin implementar pantallas aquí.
 
 ## Capabilities

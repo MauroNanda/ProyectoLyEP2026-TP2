@@ -1,5 +1,7 @@
 # Servidor backend y persistencia
 
+Cuentas, permisos, bootstrap, historial y transición de frontend: [documents/seguridad.md](documents/seguridad.md). Las rutas comerciales requieren ahora sesión real; coordinar la integración del frontend antes de fusionar esta rama.
+
 Base JavaScript ESM con Express y MongoDB Atlas. Requiere Node.js 24 o superior.
 
 La configuración, contratos y verificaciones están en:
@@ -38,3 +40,7 @@ Ejecutar la suite completa de pruebas locales (no requiere conexión activa a At
 ```powershell
 npm test
 ```
+
+## Documentación interactiva
+
+Con el servidor iniciado en desarrollo, abrir http://127.0.0.1:3001/api/docs. Contrato en /api/openapi.json. Iniciar sesión con POST /api/auth/login y pegar el token en Authorize para probar rutas protegidas. Procedimiento completo en [documents/seguridad.md](documents/seguridad.md#swagger-probar-desde-el-navegador). Las rutas documentales no se publican con NODE_ENV=production.

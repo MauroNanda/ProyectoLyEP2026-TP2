@@ -2,7 +2,7 @@
 
 Ver proposal.md para motivación. Base comprobada: main 550d861, con backend académico y rediseño integrados. Express registra GET/POST/DELETE de clientes; usuarios simulados viven en el frontend. La capa de servicios ya valida obligatorios/email y conserva campos inválidos, pero el middleware no publica esos campos. No hay edición de clientes ni autorización real. ROADMAP y config conservan referencias históricas a backend pendiente; no se toman como estado vigente.
 
-Esta propuesta contiene decisiones recomendadas para revisión, no implementación aprobada. Se conserva JavaScript ESM, driver MongoDB, conexión compartida y capas actuales.
+El usuario autorizó los commits de planificación y la implementación el 2026-10-04. La integración frontend y el cierre requieren revisión posterior. Se conserva JavaScript ESM, driver MongoDB, conexión compartida y capas actuales.
 
 ## Goals / Non-Goals
 
@@ -29,7 +29,7 @@ No desactivar ni degradar al último administrador activo. Serializar modificaci
 
 ### 2. Credenciales y sesiones
 
-Se propone scrypt asíncrono nativo de Node, salt aleatorio por cuenta, formato versionado y comparación constante. Perfil inicial N=131072, r=8, p=1, salt de 16 bytes, derivación de 64 bytes y maxmem de 192 MiB, sujeto a medición local antes de aprobación de implementación. Sin hash rápido de contraseña ni contraseñas por defecto. Longitud propuesta 12–128 caracteres Unicode, sin recortar ni normalizar la contraseña. La contraseña inicial se entrega por canal privado; se permite cambiarla con la contraseña actual, pero no hay recuperación por email ni reseteo administrativo en este hito.
+Se propone scrypt asíncrono nativo de Node, salt aleatorio por cuenta, formato versionado y comparación constante. Perfil inicial N=131072, r=8, p=1, salt de 16 bytes, derivación de 64 bytes y maxmem de 192 MiB, medido localmente durante la implementación; ver verification.md. Sin hash rápido de contraseña ni contraseñas por defecto. Longitud propuesta 12–128 caracteres Unicode, sin recortar ni normalizar la contraseña. La contraseña inicial se entrega por canal privado; se permite cambiarla con la contraseña actual, pero no hay recuperación por email ni reseteo administrativo en este hito.
 
 Sesión opaca: token aleatorio de 32 bytes, enviado una sola vez al iniciar sesión; en Mongo se guarda únicamente su hash SHA-256, usuarioId, inicio, expiresAt y revocación. SHA-256 se usa para token aleatorio, no para contraseña. Duración absoluta propuesta: 8 horas, sin refresh token. Índice TTL limpia sesiones expiradas, pero cada solicitud comprueba fecha y estado sin depender de esa limpieza. Cabecera Authorization: Bearer; no cookies automáticas en este contrato. El frontend posterior deberá mantener el token en memoria, sin localStorage; recargar solicitará iniciar sesión de nuevo.
 
@@ -89,3 +89,7 @@ La protección se desarrolla y prueba en rama. Antes de integrarla en main, el c
 
 [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) y [Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html): referencias para hash lento y tokens impredecibles. Las duraciones, roles y contratos anteriores son decisiones propuestas para Apacheta, no requisitos atribuidos a estas fuentes.
 
+
+### Documentación interactiva autorizada
+
+OpenAPI 3.0.3 mantenido en server/documents/openapi.js; Swagger UI servido desde dependencia local en /api/docs y contrato JSON en /api/openapi.json. Solo NODE_ENV ausente o development habilita estas rutas; producción/test y otros valores no las registran. Authorization Bearer sin persistencia del token al recargar, sin ejemplos de credenciales ni validador externo. Servidor relativo al mismo origen para respetar HOST/PORT. Documentar todas las operaciones y errores sin saltar permisos.
