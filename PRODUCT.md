@@ -16,7 +16,7 @@ Que ningún compromiso con el cliente quede en el camino. La visión es seguimie
 
 ## Capabilities and Constraints
 
-El cliente disponible permite acceso simulado, listado, búsqueda por apellido o ciudad, ficha, alta y baja según sector. Consume una API propia persistida en MongoDB Atlas. Bandeja, compromisos, historial y alertas son visión futura, no capacidades disponibles. No fabricar datos o controles para aparentarlas. Preservar contratos y permisos.
+El cliente disponible permite acceso con cuentas y sesiones reales del backend, listado, búsqueda por apellido o ciudad, ficha, alta y baja según rol. Consume una API propia persistida en MongoDB Atlas. Administrador gestiona cuentas y consulta auditoría administrativa; los tres roles consultan su cuenta y cambian su contraseña. El token vive en memoria y recargar requiere login. Bandeja, compromisos, historial comercial y alertas son visión futura, no capacidades disponibles. No fabricar datos o controles para aparentarlas. Preservar contratos y permisos.
 
 ## Brand Commitments
 

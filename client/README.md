@@ -1,87 +1,92 @@
-# Frontend - Panel de Control de Clientes (CRM)
+# Apacheta — frontend
 
-Proyecto de interfaz de usuario desarrollado con React y Vite para la gestión y visualización de clientes comerciales, integrado con API REST propia persistida en MongoDB Atlas.
+React/Vite para clientes comerciales, cuentas internas y auditoría administrativa. Consume el backend existente de `server/`, con MongoDB Atlas. El login no contiene cuentas ni contraseñas hardcodeadas; el script local de siembra crea datos de demostración mediante la API.
 
-Contribución del issue [#7](https://github.com/MauroNanda/ProyectoLyEP2026-TP2/issues/7), responsable Sebastián Velázquez. Change activo: `integracion-frontend-verificacion`.
+## Ejecución local
 
----
+Requiere Node 24+ y el backend configurado según [seguridad.md](../server/documents/seguridad.md). Desde `server/`, instalar dependencias y ejecutar `npm start`. El equipo debe tener una cuenta activa; el bootstrap del primer administrador se coordina una sola vez en una base sin cuentas.
 
-## 1. Configuración de Entorno
+Desde `client/`:
 
-El cliente consume la API REST a través de la variable de entorno `VITE_API_URL`.
-
-Copiar el archivo de ejemplo para configurar el entorno local:
-```bash
-cp .env.example .env
-```
-
-Contenido de `.env.example`:
-```env
-# URL base de la API REST propia de clientes
-VITE_API_URL=http://localhost:3001/api/clientes
-```
-
-> **Nota:** Si `VITE_API_URL` no está definida, el cliente utiliza por defecto `http://localhost:3001/api/clientes`.
-
----
-
-## 2. Instalación y Ejecución
-
-Desde la carpeta `client/`:
-
-```bash
-# Instalar dependencias
-npm install
-
-# Iniciar servidor de desarrollo en http://localhost:5173
+```powershell
+npm ci
+Copy-Item .env.example .env
 npm run dev
-
-# Compilar para producción (validación de build)
-npm run build
 ```
 
----
+Abrir http://localhost:5173 y usar el email/contraseña de una cuenta real. El backend determina el rol; no hay selector de sector. Su CORS_ORIGIN debe coincidir con el origen del frontend.
 
-## 3. Puesta en Marcha Coordinada (Frontend + Backend)
+El script dev fija el puerto 5173 y usa strictPort: si está ocupado, Vite informa el error y termina en lugar de cambiar a otro puerto. Así se mantiene el origen previsto por CORS del backend. No hace falta escribir esos argumentos al iniciar.
 
-Para el funcionamiento completo del sistema:
+## URLs de API
 
-1. **Backend (`server/`)**:
-   - Asegurar que `server/.env` contenga la cadena de conexión a MongoDB Atlas (`MONGODB_URI`) y el puerto 3001.
-   - Ejecutar `npm start` o `npm run dev` en `server/`.
-   - Verificar que el backend esté disponible en `http://localhost:3001/api/clientes`.
+`VITE_API_URL` sigue siendo la URL completa de clientes (default `http://localhost:3001/api/clientes`). `VITE_API_BASE_URL` configura la base de auth, cuentas y auditoría. Si falta, se deriva quitando el sufijo `/clientes` de VITE_API_URL; funciona con prefijos personalizados. Si la URL comercial no tiene ese sufijo, indicar explícitamente la base.
 
-2. **Frontend (`client/`)**:
-   - Ejecutar `npm run dev` en `client/`.
-   - Abrir `http://localhost:5173` en el navegador.
+Ambas URLs deben ser HTTP/HTTPS absolutas del mismo origen, sin usuario/contraseña, query ni fragmentos. Ejemplo sin secretos:
 
----
+```env
+VITE_API_URL=http://localhost:3001/api/clientes
+VITE_API_BASE_URL=http://localhost:3001/api
+```
 
-## 4. Cambios de Integración Realizados
+No usar estas variables para secretos: Vite las publica en el cliente. Reiniciar Vite tras cambiar configuración.
 
-- **Sustitución de FakeStoreAPI**:
-  - `client/src/services/clientesService.js`: consume `import.meta.env.VITE_API_URL` para `obtenerClientes`, `obtenerClientePorId`, `crearCliente` y `eliminarCliente`.
-  - `client/src/pages/Dashboard.jsx`: sustituye la llamada directa a `https://fakestoreapi.com/users` por `clientesService.obtenerClientes()`, preservando estados de carga, error y conteo dinámico.
-- **Desacople de credenciales comerciales**:
-  - `client/src/components/FormCliente.jsx`: eliminación del envío de contraseñas ficticias (`password`) en el alta de clientes comerciales.
-  - `client/src/pages/DetalleCliente.jsx`: remoción de la sección de visualización de contraseñas y aplicación de encadenamiento opcional para renderizar con seguridad campos de dirección opcionales (`street`, `number`, `zipcode`).
-  - `client/src/pages/ListaClientes.jsx`: protección con optional chaining en filtros de búsqueda y renderizado de tabla.
+## Sesión y permisos
 
----
+Token opaco exclusivamente en memoria, enviado mediante Authorization Bearer. Recargar solicita login; no se restaura identidad desde localStorage ni sessionStorage. Solo se retiran las claves antiguas admin/role. Expiración y revocación limpian los datos privados. Logout siempre termina el acceso local; si falla la red, informa que no pudo confirmar revocación remota.
 
-## 5. Verificación de Funcionamiento
+Los tres roles consultan/crean clientes y usan Mi cuenta. Administrador y Gerencia eliminan clientes con confirmación. Solo Administrador ve Cuentas e Historial administrativo y su resumen real de cuentas en Inicio. El backend valida cada petición.
 
-- **Build de producción:** `npm run build` compila limpiamente sin advertencias ni errores.
-- **Dashboard:** visualiza la cantidad real de clientes devueltos por el backend y muestra el mensaje accesible de alerta en caso de desconexión.
-- **Listado de Clientes:** carga los clientes persistidos desde MongoDB Atlas con soporte de búsqueda por apellido y ciudad.
-- **Detalle de Cliente:** navega por ID de MongoDB, presenta los datos de contacto y dirección sin credenciales comerciales.
-- **Alta de Cliente:** formulario operativo que persiste registros comerciales en la base de datos Atlas.
-- **Baja de Cliente:** eliminación confirmada por rol Gerencia conectada con el endpoint `DELETE /api/clientes/:id`.
+Cuentas permite alta activa y editar nombre/rol/estado; el email es inmutable. Cambiar rol/estado revoca sesiones; no se permite dejar sin administrador activo. No hay baja física, reset ajeno, recuperación ni registro público. Cambiar contraseña desde Mi cuenta exige la actual y cierra todas las sesiones. Se admiten 12–128 caracteres Unicode sin recorte ni requisitos inventados de complejidad.
 
----
+Historial es de solo lectura: tipo, cuenta, fechas con hora en la zona indicada y límite 1–100. Editar filtros no consulta; Actualizar historial los aplica juntos y reinicia el cursor. Limpiar filtros aplica los valores iniciales. Se cancelan solicitudes anteriores al reemplazar la consulta. Siguiente/Anterior usan cursor opaco, sin totales ficticios. Los eventos conservan actorId y rol histórico; un nombre actual solo es ayuda.
 
-## Declaración de Uso de IA
+Cuentas permite buscar por nombre/email y combinar rol/estado sobre el listado recibido, sin nuevas solicitudes; muestra cantidad visible y permite limpiar filtros.
 
-- **Herramienta:** Asistente AI Antigravity.
-- **Asistencia recibida:** Definición de propuesta OpenSpec, especificaciones formales, diseño de integración, adaptación de consumidores a variables de entorno Vite, retiro de credenciales comerciales y documentación técnica.
-- **Control humano y autorización:** Todas las decisiones y código fueron supervisadas y autorizadas según el roadmap y el issue asignado. Commits, ramas y PR quedan bajo validación y control explícito del integrante.
+Se conservan listado, búsqueda por apellido/ciudad (q), alta (alta=1), ficha, confirmación de baja, advertencia de datos pendientes y estilo Apacheta.
+
+## Verificación
+
+```powershell
+npm test
+npm run build
+npm run lint
+```
+
+Las pruebas nativas de Node no requieren Atlas ni cuentas del equipo. Cubren transporte, sesión, permisos, validación, errores y filtros. Regresión backend: `npm test` desde server/.
+
+E2E reproducibles de navegador + API real + Atlas:
+
+```powershell
+npm run test:e2e
+```
+
+Requiere instalar dependencias de client/ y server/, Chrome y configurar server/.env para Atlas. Son cuatro casos independientes: sesión, permisos, cuentas/revocación y contraseña. Cada caso crea y elimina cinco colecciones propias `apacheta_frontend_e2e_<UUID>_<recurso>`; nunca usa las cuentas permanentes. Vite usa 127.0.0.1:5175. Las trazas de fallos quedan en test-results/ (ignorado por Git); contienen datos de prueba y deben mantenerse locales. Playwright Test es dependencia de desarrollo, sin impacto en el bundle.
+
+Verificación adicional amplia, con responsive y estados adversos:
+
+```powershell
+# Opcional si Chrome no está en su ubicación habitual:
+$env:BROWSER_EXECUTABLE = '<ruta absoluta al ejecutable del navegador>'
+npm run verificar:integracion
+```
+
+Usa Playwright instalado con npm ci, Chrome, server/.env y permisos de Atlas para índices/transacciones y eliminación de las colecciones propias. El script inicia una API aislada y Vite en 127.0.0.1:5174; no usar ese puerto para otro proceso durante la prueba.
+
+Crea cinco colecciones `apacheta_frontend_verificacion_<UUID>_<recurso>`, con cuentas y contraseñas aleatorias temporales; no usa las cuentas ni clientes del equipo. El bootstrap es exclusivamente de ese repositorio aislado. Al finalizar elimina únicamente esos cinco nombres y comprueba ausencia. Si se interrumpe abruptamente, revisar exclusivamente el prefijo exacto de esa ejecución, sin borrar la base ni colecciones compartidas. Un fallo de permisos no autoriza bajar controles.
+
+Guarda resultados públicos y capturas en el [change OpenSpec](../openspec/changes/archive/2026-10-04-cuentas-sesiones-permisos-auditoria-frontend/verification.md). Distingue operaciones reales de respuestas adversas controladas en navegador. Los datos/IDs de capturas son ficticios temporales y no representan cuentas del equipo.
+
+## Cuentas locales de demostración
+
+Con el backend iniciado, configurar SEED_ADMIN_EMAIL y SEED_ADMIN_PASSWORD en el entorno de la terminal o en server/.env local, y ejecutar desde client/:
+
+```powershell
+npm run seed:cuentas
+```
+
+Usa la API en http://localhost:3001/api (SEED_API_BASE_URL permite cambiarla), requiere un Administrador activo y cierra su sesión al finalizar. Crea administrador@example.test, gerencia@example.test y soporte@example.test con sus roles respectivos. Por decisión del usuario, cada correo es también su contraseña de demostración. Si el email ya existe, lo omite: no cambia contraseña, rol ni estado. Son datos de prueba reales del backend local configurado, separados de las colecciones temporales E2E. No hay bootstrap ni autenticación simulada; las credenciales administrativas no se versionan.
+
+## Procedencia y asistencia
+
+La integración comercial anterior se conserva; su historia está en el change archivado integracion-frontend-verificacion. Codex asistió en esta integración de sesión, pantallas, pruebas y documentación. El usuario revisó/aprobó la propuesta y autorizó implementar. El usuario confirmó su prueba manual y validación funcional final; resultados ejecutados y límites se registran en verification.md. No se crearon commits ni publicación automáticamente.

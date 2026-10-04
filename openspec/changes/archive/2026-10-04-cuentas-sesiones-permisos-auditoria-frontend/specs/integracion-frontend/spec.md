@@ -1,8 +1,5 @@
-# integracion-frontend Specification
+## MODIFIED Requirements
 
-## Purpose
-Define el comportamiento observable de la integración del frontend con la API REST propia de clientes, asegurando consumo parametrizado por entorno, retiro de contraseñas comerciales y persistencia verificable.
-## Requirements
 ### Requirement: Consumo parametrizado de la API de clientes
 El frontend SHALL realizar todas las operaciones de consulta, creación y eliminación de clientes a través de la URL base provista por `VITE_API_URL`, utilizando `http://localhost:3001/api/clientes` por defecto y sin FakeStoreAPI. SHALL enviar Authorization Bearer de la sesión en memoria y conservar id como cadena. Auth/cuentas/auditoría SHALL usar VITE_API_BASE_URL o la base derivada del sufijo /clientes, exigiendo configuración explícita si no puede derivarse y rechazando orígenes incoherentes.
 
@@ -29,17 +26,6 @@ El Dashboard SHALL obtener el total mediante el servicio autenticado de clientes
 - **WHEN** falla la consulta comercial
 - **THEN** se muestra Total no disponible de forma accesible sin convertirlo en cero ni ocultar la sesión o información autorizada recuperada.
 
-### Requirement: Desacople de contraseñas comerciales en creación y detalle
-El sistema SHALL gestionar los datos comerciales de clientes sin requerir ni almacenar contraseñas ficticias en el flujo comercial, diferenciando los clientes comerciales de las cuentas de acceso administrativo.
-
-#### Scenario: Creación de cliente desde el formulario comercial
-- **WHEN** el usuario completa y envía el formulario de nuevo cliente con nombre, email, teléfono y ciudad válidos
-- **THEN** el frontend envía la solicitud POST a la API propia omitiendo la propiedad password y recibe el cliente creado con su identificador persistente
-
-#### Scenario: Visualización de ficha de cliente sin contraseñas
-- **WHEN** se visualiza la ficha de un cliente existente
-- **THEN** la pantalla expone los datos de contacto y campos de dirección disponibles omitiendo la sección o visualización de contraseña comercial
-
 ### Requirement: Eliminación de cliente y actualización de estado
 El frontend SHALL permitir DELETE al backend propio solo mediante acción confirmada visible para Administrador/Gerencia y SHALL ocultarla para Soporte. SHALL enviar Bearer y esperar confirmación antes de actualizar estado.
 
@@ -50,6 +36,8 @@ El frontend SHALL permitir DELETE al backend propio solo mediante acción confir
 #### Scenario: Rechazo del servidor
 - **WHEN** DELETE responde 403
 - **THEN** se informa falta de permiso sin simular baja ni cerrar sesión válida.
+
+## ADDED Requirements
 
 ### Requirement: Validación comercial y errores por campo
 El formulario SHALL conservar el contrato comercial sin password y validar las reglas vigentes del backend: email <=254 con patrón backend; teléfono <=40, patrón permitido y 7–15 dígitos; nombre/ciudad obligatorios <=100 con letra Unicode; username derivado <=100. SHALL contar puntos de código, mapear campos públicos anidados a controles y representar errores generales/desconocidos en resumen accesible. SHALL conservar datos tras rechazo, enfocar primer error y evitar envíos duplicados.
