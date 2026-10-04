@@ -46,30 +46,31 @@ function convertirId(id) {
 }
 
 // El modelo comparte la conexión. No contiene reglas HTTP ni validación comercial.
-export function crearModeloCliente(obtenerBase = obtenerBaseDeDatos) {
+export function crearModeloCliente(obtenerBase = obtenerBaseDeDatos, opciones = {}) {
   function coleccion() { return obtenerBase().collection('clientes'); }
   async function almacenar(operacion) {
     try { return await operacion(); }
     catch (error) {
+      if (opciones.session && error.hasErrorLabel?.('TransientTransactionError')) throw error;
       if (error instanceof ErrorPersistencia) throw error;
       throw new ErrorPersistencia('ALMACENAMIENTO_FALLIDO', 'No se pudo completar la operación de clientes.');
     }
   }
   return {
-    listarClientes: () => almacenar(async () => (await coleccion().find({}).toArray()).map(convertirCliente)),
+    listarClientes: () => almacenar(async () => (await coleccion().find({}, opciones).toArray()).map(convertirCliente)),
     buscarClientePorId: (id) => almacenar(async () => {
       const _id = convertirId(id);
-      const encontrado = await coleccion().findOne({ _id });
+      const encontrado = await coleccion().findOne({ _id }, opciones);
       return encontrado ? convertirCliente(encontrado) : null;
     }),
     crearCliente: (datos) => almacenar(async () => {
       const documento = { _id: new ObjectId(), ...seleccionarDatosCliente(datos) };
-      await coleccion().insertOne(documento);
+      await coleccion().insertOne(documento, opciones);
       return convertirCliente(documento);
     }),
     eliminarCliente: (id) => almacenar(async () => {
       const _id = convertirId(id);
-      return (await coleccion().deleteOne({ _id })).deletedCount === 1;
+      return (await coleccion().deleteOne({ _id }, opciones)).deletedCount === 1;
     }),
   };
 }

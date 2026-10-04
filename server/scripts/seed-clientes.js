@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { ObjectId } from 'mongodb';
 import { conectarBaseDeDatos, cerrarBaseDeDatos, ErrorPersistencia } from '../config/database.js';
+import { prepararDatosCliente } from '../services/validacion.js';
 import { seleccionarDatosCliente } from '../models/cliente.js';
 
 export function prepararEjemplos(ejemplos) {
@@ -13,7 +14,7 @@ export function prepararEjemplos(ejemplos) {
       throw new ErrorPersistencia('FIXTURE_INVALIDO', 'Los ejemplos requieren identificadores válidos y distintos.');
     }
     ids.add(id.toLowerCase());
-    return { _id: new ObjectId(id), ...seleccionarDatosCliente(ejemplo) };
+    return { _id: new ObjectId(id), ...seleccionarDatosCliente(prepararDatosCliente(ejemplo)) };
   });
 }
 

@@ -1,39 +1,4 @@
-# servidor-rutas-middleware Specification
-
-## Purpose
-Proveer la aplicación y servidor Express en el puerto configurado (3001 por defecto), habilitar CORS para el frontend, registrar las cuatro rutas de `/api/clientes` conectadas a los controladores, estandarizar las respuestas de error y rutas inexistentes bajo el formato común acordado, y coordinar el ciclo de vida con MongoDB Atlas.
-
-## Requirements
-
-### Requirement: Exposición del servidor HTTP y configuración por entorno
-El servidor SHALL exponer la API HTTP en el puerto configurado por entorno o en el puerto 3001 por defecto, y habilitar CORS para el origen del frontend (`http://localhost:5173` o el origen configurado), permitiendo métodos estándar y cabeceras necesarias, incluidas las solicitudes preflight `OPTIONS`.
-
-#### Scenario: Inicio en puerto por defecto
-- **WHEN** se inicia el servidor sin variable `PORT` definida
-- **THEN** la aplicación escucha solicitudes en el puerto 3001
-
-#### Scenario: Inicio en puerto configurado
-- **WHEN** se inicia el servidor con la variable de entorno `PORT`
-- **THEN** la aplicación escucha en el puerto indicado por dicha variable
-
-#### Scenario: Solicitud desde el frontend con CORS
-- **WHEN** un cliente HTTP envía una solicitud con cabecera `Origin: http://localhost:5173`
-- **THEN** el servidor responde con las cabeceras `Access-Control-Allow-Origin` correspondientes permitiendo el acceso
-
-#### Scenario: Solicitud preflight OPTIONS
-- **WHEN** un cliente HTTP envía una solicitud `OPTIONS` a `/api/clientes` con cabeceras de preflight
-- **THEN** el servidor responde exitosamente indicando los métodos permitidos (`GET`, `POST`, `DELETE`, etc.)
-
-### Requirement: Procesamiento de solicitudes JSON y manejo de sintaxis inválida
-La aplicación SHALL procesar cuerpos de solicitud con formato JSON (`application/json`) y SHALL capturar errores de sintaxis en cuerpos malformados, respondiendo con estado 400 y formato de error estándar, sin abortar el proceso ni exponer trazas internas.
-
-#### Scenario: Solicitud con cuerpo JSON válido
-- **WHEN** se envía una solicitud `POST` con cabecera `Content-Type: application/json` y un JSON sintácticamente correcto
-- **THEN** el middleware parsea el cuerpo y lo pone a disposición en `req.body`
-
-#### Scenario: Solicitud con cuerpo JSON malformado
-- **WHEN** se envía una solicitud con cabecera `Content-Type: application/json` y contenido JSON sintácticamente inválido
-- **THEN** el middleware de error responde con estado 400 y el objeto `{ "error": { "code": "JSON_INVALIDO", "message": "El cuerpo de la solicitud contiene JSON malformado." } }`
+## MODIFIED Requirements
 
 ### Requirement: Enrutamiento de operaciones de clientes
 El enrutador del servidor SHALL registrar las cuatro operaciones del recurso `/api/clientes` y conectarlas directamente a los controladores de clientes reales (`listarClientes`, `obtenerClientePorId`, `crearCliente`, `eliminarCliente`).
@@ -60,17 +25,11 @@ Las cuatro rutas SHALL exigir sesión vigente y el rol autorizado según cuentas
 - **WHEN** falta sesión válida o el rol no permite la operación
 - **THEN** responde 401 o 403 respectivamente sin invocar el caso de uso.
 
-### Requirement: Tratamiento transversal de rutas inexistentes
-La aplicación SHALL interceptar cualquier solicitud HTTP cuya ruta o método no coincida con ningún endpoint registrado y SHALL responder con estado 404 y la estructura de error común.
-
-#### Scenario: Solicitud a ruta no registrada
-- **WHEN** se realiza una solicitud a una ruta no contemplada en la aplicación (por ejemplo `GET /api/desconocido`)
-- **THEN** el middleware responde con estado 404 y el cuerpo `{ "error": { "code": "RUTA_NO_ENCONTRADA", "message": "La ruta solicitada no existe." } }`
 
 ### Requirement: Middleware común de errores
 La aplicación SHALL disponer de un middleware de manejo de errores con firma `(err, req, res, next)` que capture las excepciones derivadas por controladores y otros middlewares, traduciendo los códigos conocidos a estados HTTP y construyendo la respuesta bajo el esquema `{ "error": { "code": "...", "message": "..." } }`. Ante errores no controlados, MUST responder con estado 500 y código seguro, sin revelar credenciales, cadenas de conexión ni trazas de error.
 
-El middleware SHALL publicar campos opcional para validación, y reconocer errores controlados 401, 403, 409, 413, 429 y 503 conforme a [diseño del change](../../changes/archive/2026-10-04-cuentas-permisos-auditoria-backend/design.md), sin reenviar detalles del driver.
+El middleware SHALL publicar campos opcional para validación, y reconocer errores controlados 401, 403, 409, 413, 429 y 503 conforme a design.md, sin reenviar detalles del driver.
 
 #### Scenario: Error por entrada inválida o identificador inválido
 - **WHEN** un controlador deriva un error con código `ENTRADA_INVALIDA` o `ID_INVALIDO`
@@ -96,6 +55,7 @@ El middleware SHALL publicar campos opcional para validación, y reconocer error
 - **WHEN** el servicio informa campos de entrada inválidos
 - **THEN** devuelve 400 y los nombres públicos en error.campos sin revelar datos internos.
 
+
 ### Requirement: Coordinación del ciclo de vida con MongoDB Atlas
 El módulo de arranque del servidor SHALL coordinar la inicialización y el apagado con las funciones compartidas de persistencia (`conectarBaseDeDatos` y `cerrarBaseDeDatos`). Si la conexión a la base de datos falla al iniciar, el servidor MUST NOT declarar disponibilidad normal y MUST abortar el arranque informando el error de forma segura sin exhibir credenciales. Ante señales de terminación (`SIGINT`, `SIGTERM`), el servidor SHALL detener la recepción de nuevas conexiones HTTP y cerrar la conexión a la base de datos.
 
@@ -120,6 +80,8 @@ El servidor SHALL validar entorno antes de conectar, manejar errores al escuchar
 #### Scenario: Configuración inválida
 - **WHEN** PORT, HOST o CORS_ORIGIN incumplen el contrato de configuración
 - **THEN** rechaza el arranque con mensaje seguro antes de conectar o abrir puerto.
+
+## ADDED Requirements
 
 ### Requirement: Documentación interactiva de la API en desarrollo
 El servidor SHALL publicar Swagger UI en /api/docs y OpenAPI 3.0.3 en /api/openapi.json únicamente cuando NODE_ENV está ausente o es development. El contrato SHALL describir las operaciones de clientes, cuentas, autenticación y auditoría, permisos, cuerpos y errores. SHALL usar Bearer sin credenciales precargadas ni persistencia de autorización, recursos locales y sin validación externa.

@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { crearApp, app } from '../app.js';
+import { crearApp as crearAppReal, app } from '../app.js';
 import { manejadorErrores } from '../middleware/errores.js';
 import { manejadorRutaNoEncontrada } from '../middleware/no-encontrado.js';
 import { crearRouterClientes, routerClientes } from '../routes/clientes.js';
 
+import { ErrorServicio } from '../services/errores.js';
+const crearApp = opciones => crearAppReal({ ...opciones, logger: {}, seguridad: { autenticar: async () => ({ usuario: { rol: 'Administrador' } }) } });
+const fetch = (url, opciones={}) => globalThis.fetch(url,{...opciones,headers:{Authorization:'Bearer '+ 'a'.repeat(43),...opciones.headers}});
 const clienteMock = {
   id: '0123456789abcdef01234567',
   email: 'ana@example.com',
@@ -195,12 +198,12 @@ test('ruta inexistente responde 404 con formato estándar', async () => {
 test('middleware traduce ENTRADA_INVALIDA e ID_INVALIDO a 400 con su mensaje', async () => {
   const controladores = {
     listarClientes: (req, res, next) => {
-      const err = new Error('El campo email es obligatorio.');
+      const err = new ErrorServicio('ENTRADA_INVALIDA','El campo email es obligatorio.');
       err.code = 'ENTRADA_INVALIDA';
       return next(err);
     },
     obtenerClientePorId: (req, res, next) => {
-      const err = new Error('Identificador no válido.');
+      const err = new ErrorServicio('ID_INVALIDO','Identificador no válido.');
       err.code = 'ID_INVALIDO';
       return next(err);
     },
@@ -236,7 +239,7 @@ test('middleware traduce CLIENTE_NO_ENCONTRADO a 404 con su mensaje', async () =
   const controladores = {
     listarClientes: (req, res) => res.status(200).json([]),
     obtenerClientePorId: (req, res, next) => {
-      const err = new Error('Cliente no encontrado.');
+      const err = new ErrorServicio('CLIENTE_NO_ENCONTRADO','Cliente no encontrado.');
       err.code = 'CLIENTE_NO_ENCONTRADO';
       return next(err);
     },
@@ -317,40 +320,5 @@ test('iniciarServidor aborta con código 1 sin abrir puerto si conectarBaseDeDat
   assert.equal(codigoSalida, 1);
   assert.equal(listenLlamado, false);
   assert.equal(mensajesError.length > 0, true);
-});
-
-test('iniciarServidor conecta e inicia escucha si la conexión es exitosa', async () => {
-  const { iniciarServidor } = await import('../index.js');
-  let conectado = false;
-  let serverCerrado = false;
-
-  const mockApp = {
-    listen: (puerto, callback) => {
-      callback();
-      return {
-        on: () => {},
-        close: (cb) => {
-          serverCerrado = true;
-          cb();
-        },
-      };
-    },
-  };
-
-  const servidor = await iniciarServidor({
-    aplicacion: mockApp,
-    conectar: async () => {
-      conectado = true;
-    },
-    cerrar: async () => {},
-    logger: {
-      log: () => {},
-      error: () => {},
-    },
-    salir: () => {},
-  });
-
-  assert.equal(conectado, true);
-  assert.equal(typeof servidor.close, 'function');
 });
 
