@@ -27,3 +27,5 @@ dist-ssr
 *.sw?
 
 ANALISIS_CODIGO.md
+test-results/
+playwright-report/

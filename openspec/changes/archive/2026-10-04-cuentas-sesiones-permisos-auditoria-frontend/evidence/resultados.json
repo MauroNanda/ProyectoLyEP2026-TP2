@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-10-04T21:28:46.398Z",
+  "resultados": {
+    "login real, recarga y limpieza de identidad heredada": true,
+    "alta, edición y restricciones de cuentas": true,
+    "historial real, cursores, filtros y actor nulo": true,
+    "diseño responsive, teclado y zoom": true,
+    "estados controlados: campos, permiso, cursor, red y respuestas tardías": true,
+    "password incorrecta conserva sesión y cambio real la cierra": true,
+    "Soporte no consulta administración y conserva alta comercial": true,
+    "Gerencia elimina y mantiene prohibición administrativa": true,
+    "Administrador baja, revocación por estado y persistencia": true,
+    "cambio de rol propio termina acceso administrativo": true
+  },
+  "erroresPagina": [],
+  "limpieza": "Cinco colecciones temporales eliminadas y verificado que no quedan."
+}

@@ -1,33 +1,8 @@
-import axios from "axios";
-
-const URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api/clientes";
-
-const obtenerClientes = async () => {
-    const respuesta = await axios.get(URL);
-    return respuesta.data;
-};
-
-const obtenerClientePorId = async (id) => {
-    const respuesta = await axios.get(`${URL}/${id}`);
-    return respuesta.data;
-};
-
-const crearCliente = async (cliente) => {
-    const respuesta = await axios.post(
-        URL,
-        cliente
-    );
-    return respuesta.data;
-};
-
-const eliminarCliente = async (id) => {
-    const respuesta = await axios.delete(`${URL}/${id}`);
-    return respuesta.data;
-};
-
-export default {
-    obtenerClientes,
-    obtenerClientePorId,
-    crearCliente,
-    eliminarCliente
-};
+import { api } from './apiClient.js';
+export const crearClientesService = (http = api) => ({
+  obtenerClientes: () => http('clientes'),
+  obtenerClientePorId: id => http('clientes/' + encodeURIComponent(id)),
+  crearCliente: body => http('clientes', { method: 'POST', body }),
+  eliminarCliente: id => http('clientes/' + encodeURIComponent(id), { method: 'DELETE' }),
+});
+export default crearClientesService();

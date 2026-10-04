@@ -161,11 +161,15 @@ Entradas con fondo de control, borde visible y etiqueta superior. Foco cambia bo
 
 ### Navigation
 
-Lateral con Inicio y Clientes, tono activo arcilla suave y texto reforzado. En móvil pasa arriba sin ocultar acciones principales. El enlace de salto lleva al contenido y el breadcrumb describe ubicación.
+Lateral con Inicio, Clientes y Mi cuenta; Administrador también ve Cuentas e Historial administrativo. Tono activo arcilla suave y texto reforzado. En móvil pasa arriba y distribuye enlaces en varias filas sin ocultar acciones principales. El enlace de salto lleva al contenido y el breadcrumb describe ubicación. La identidad de sesión muestra rol obtenido del servidor.
 
 ### Directory
 
 Filas separadas por borde tenue, hover de control y enlace a ficha de 44 px. Búsqueda conserva q en URL; alta conserva alta=1. Abrir alta enfoca Nombre; cerrar conserva datos y devuelve foco. Carga estática, vacío, sin coincidencias y error tienen mensajes y siguiente paso propio.
+
+### Administrative surfaces
+
+Cuentas usa filas con nombre, email, rol, estado textual y acción de edición; hasta 600 px cada fila apila datos etiquetados y conserva la acción visible. El listado combina búsqueda local por nombre/email y filtros por rol/estado, con cantidad visible y limpieza. Alta/edición se presentan en un formulario dentro de la página, con correo de solo lectura al editar y confirmación de revocación al modificar rol/estado. Mi cuenta agrupa identidad y cambio de contraseña. Historial administrativo prioriza filtros y una lista de eventos separados por líneas, con fecha/zona, actor/rol histórico y datos públicos; los controles de cursor no inventan totales. Editar filtros conserva resultados; Actualizar historial aplica el conjunto y Limpiar filtros aplica valores iniciales. Filtros y datos de eventos pasan de dos columnas a una en móvil. Se reutilizan colores, tipografías, foco y estados existentes.
 
 ### Messages and confirmation
 
