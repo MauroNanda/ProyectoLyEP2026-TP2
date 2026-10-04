@@ -7,6 +7,7 @@ import DetalleCliente from '../pages/DetalleCliente'
 import ErrorPage from '../pages/ErrorPage'
 import RutaProtegida from '../components/RutaProtegida'
 import MiCuenta from '../pages/MiCuenta'
+import Cuentas from '../pages/Cuentas'
 const AppRoutes = () => {
   return (
     <Routes>
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       }
       />
       <Route path="/mi-cuenta" element={<RutaProtegida><MiCuenta /></RutaProtegida>} />
+      <Route path="/cuentas" element={<RutaProtegida administrativa><Cuentas /></RutaProtegida>} />
       <Route path="*" element={<ErrorPage />} />
 
     </Routes>
