@@ -76,7 +76,8 @@ export function crearConexion({ crearCliente = (uri) => new MongoClient(uri, {
     finally { if (cierre === pendiente) cierre = undefined; }
   }
 
-  return { conectarBaseDeDatos, obtenerBaseDeDatos, cerrarBaseDeDatos };
+  function obtenerClienteMongo() { obtenerBaseDeDatos(); return cliente; }
+  return { conectarBaseDeDatos, obtenerBaseDeDatos, obtenerClienteMongo, cerrarBaseDeDatos };
 }
 
-export const { conectarBaseDeDatos, obtenerBaseDeDatos, cerrarBaseDeDatos } = crearConexion();
+export const { conectarBaseDeDatos, obtenerBaseDeDatos, obtenerClienteMongo, cerrarBaseDeDatos } = crearConexion();
