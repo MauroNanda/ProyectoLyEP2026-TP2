@@ -1,6 +1,6 @@
 # Servidor backend y persistencia
 
-Cuentas, permisos, bootstrap, historial y transición de frontend: [documents/seguridad.md](documents/seguridad.md). Las rutas comerciales requieren ahora sesión real; coordinar la integración del frontend antes de fusionar esta rama.
+Cuentas, permisos, bootstrap e historial: [documents/seguridad.md](documents/seguridad.md). Backend y frontend están integrados en main; las rutas comerciales requieren sesión real. El login, Mi cuenta, Cuentas e Historial administrativo se describen en [client/README.md](../client/README.md).
 
 Base JavaScript ESM con Express y MongoDB Atlas. Requiere Node.js 24 o superior.
 
