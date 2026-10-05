@@ -1,8 +1,8 @@
 # Cuentas, permisos y auditoría
 
-## Estado y transición
+## Estado de integración
 
-Implementado en la rama de backend; todavía no integrado con el frontend. Las rutas comerciales ahora exigen Bearer: el login simulado actual no genera una sesión válida. Coordinar el change frontend antes de integrar en main. No existe AUTH_DISABLED.
+Backend y frontend integrados en main mediante los PR #14 y #15. Las rutas comerciales exigen Bearer y el frontend obtiene una sesión real mediante POST /api/auth/login, sin cuentas hardcodeadas ni selector de sector. El token se conserva en memoria. No existe AUTH_DISABLED. Uso de las pantallas y pruebas en [client/README.md](../../client/README.md).
 
 Las cuentas del equipo son independientes de clientes comerciales. No se importan usuarios ni contraseñas hardcodeadas. Los contratos de este documento amplían la documentación anterior del servidor.
 
@@ -20,7 +20,7 @@ npm start
 
 Bootstrap pregunta nombre, correo y contraseña dos veces, con entrada de contraseña oculta. Requiere terminal interactiva. Ejecutarlo una sola vez de forma coordinada en una base sin cuentas: crea Administrador activo; si existe cualquier cuenta, se rechaza. Nunca se ejecuta automáticamente ni junto al seed. El equipo no debe repetirlo en la base compartida. La cuenta inicial y su contraseña las elige quien ejecute el comando; no hay valores por defecto ni secretos por argumento.
 
-Para crear otras cuentas, el administrador usa POST /api/usuarios autenticado. La pantalla correspondiente pertenece al change frontend. Se permite nombre, correo, rol exacto y contraseña inicial, entregada por canal privado. El usuario puede cambiarla con su contraseña actual. No hay registro público, recuperación por correo ni reseteo administrativo.
+Para crear otras cuentas, el administrador usa la pantalla Cuentas o POST /api/usuarios autenticado. Se permite nombre, correo, rol exacto y contraseña inicial, entregada por canal privado. El usuario puede cambiarla desde Mi cuenta con su contraseña actual. No hay registro público, recuperación por correo ni reseteo administrativo.
 
 PORT entero decimal 1–65535 (3001 si ausente); HOST localhost o IP (127.0.0.1 por defecto); CORS_ORIGIN origen HTTP/HTTPS sin ruta ni credenciales (http://localhost:5173 por defecto). Arranque comprueba conexión e índices antes de escuchar. Cierre máximo 10 segundos, salida no cero ante error.
 
@@ -75,7 +75,7 @@ npm test no necesita Atlas. verificar:seguridad necesita .env y permisos para cr
 
 Prueba HTTP autenticada, permisos, validación, revocación/expiración, persistencia, bootstrap y último admin concurrentes, correo único, cursor, rollback y retry sin duplicación. Para probar manualmente con cuentas permanentes, crear primero el administrador mediante bootstrap y usar POST /api/auth/login; no pegar contraseña/token en documentación o PR.
 
-Asistencia de IA: Codex generó implementación, pruebas y documentación a partir de la propuesta OpenSpec autorizada. Se ejecutaron validaciones automatizadas y circuito Atlas; El usuario confirmó revisión y pruebas manuales en Swagger/API y frontend el 2026-10-04. La sustitución definitiva del código de acceso simulado pertenece al change frontend y no se acredita mediante estas pruebas.
+Asistencia de IA: Codex generó implementación, pruebas y documentación a partir de la propuesta OpenSpec autorizada. Se ejecutaron validaciones automatizadas y circuito Atlas; el usuario confirmó revisión y pruebas manuales en Swagger/API y frontend el 2026-10-04. Estas pruebas corresponden al backend; la sustitución del acceso simulado y las pantallas integradas se acreditan por separado en la [verificación frontend](../../openspec/changes/archive/2026-10-04-cuentas-sesiones-permisos-auditoria-frontend/verification.md).
 
 ## Swagger: probar desde el navegador
 
