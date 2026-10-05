@@ -29,9 +29,9 @@ Assets finales revisados visualmente, sin credenciales ni datos permanentes:
 
 | Archivo | Dimensiones | Tamaño |
 |---|---|---|
-| [Inicio](../../../docs/assets/readme/inicio.png) | 1440×1000 | 85 657 bytes |
-| [Clientes](../../../docs/assets/readme/clientes.png) | 1440×1000 | 83 912 bytes |
-| [Historial](../../../docs/assets/readme/historial.png) | 1440×1610 | 156 931 bytes |
+| [Inicio](../../../../docs/assets/readme/inicio.png) | 1440×1000 | 85 657 bytes |
+| [Clientes](../../../../docs/assets/readme/clientes.png) | 1440×1000 | 83 912 bytes |
+| [Historial](../../../../docs/assets/readme/historial.png) | 1440×1610 | 156 931 bytes |
 
 Peso total: 326 500 bytes. Todas las imágenes conservan texto alternativo y descripción de origen/datos ficticios en README. Las capturas acreditan presentación observada, no una nueva suite exhaustiva de permisos o persistencia.
 
@@ -54,3 +54,7 @@ README final: 194 líneas. Se verificaron 23 referencias locales, incluidos los 
 Refinamiento adicional solicitado: aportes agrupados en una fila por integrante, destacando responsabilidades complementarias. La enumeración individual de PR se sustituyó por un enlace al historial conjunto. Se retiraron del README las fechas de validación y capturas; se conservan aquí para trazabilidad. No cambian las atribuciones ni los resultados registrados.
 
 El usuario revisó el documento y solicitó los ajustes editoriales registrados. Después autorizó explícitamente archivar el change, ejecutar los commits propuestos y pushear la rama. Esta confirmación cierra la tarea de revisión humana. No se autoriza apertura ni fusión de PR. El cierre documental no acredita cierre completo del TP2.
+
+## Archivado
+
+Archivado mediante el CLI oficial como `2026-10-05-documentacion-proyecto-apacheta`, con doce tareas completas y sin delta specs. Se corrigieron las rutas relativas de las capturas al mover el documento. Los cinco commits de contenido se complementan con un sexto commit de archivado. Se conserva la rama dedicada para el push autorizado.
